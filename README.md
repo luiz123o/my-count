@@ -1,50 +1,120 @@
-# Welcome to your Expo app 👋
+# My Regressive - Event Countdown Tracker
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo mobile para acompanhar contagens regressivas de eventos importantes.
 
-## Get started
+## Estrutura do Projeto
 
-1. Install dependencies
+O projeto segue os princípios de Clean Architecture e MVVM (Model-View-ViewModel). Aqui está a explicação da estrutura de pastas:
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+src/
+├── domain/                 # Camada de domínio (regras de negócio)
+│   ├── entities/          # Entidades do domínio (Event, Countdown)
+│   ├── repositories/      # Interfaces dos repositórios
+│   └── usecases/         # Casos de uso da aplicação
+│
+├── data/                  # Camada de dados
+│   ├── repositories/      # Implementações dos repositórios
+│   └── datasources/      # Fontes de dados (AsyncStorage, API)
+│
+├── presentation/         # Camada de apresentação (UI)
+│   ├── screens/         # Telas da aplicação
+│   ├── components/      # Componentes reutilizáveis
+│   └── viewmodels/      # ViewModels (lógica de apresentação)
+│
+├── core/                # Configurações e utilitários
+│   ├── config/         # Configurações (DI, temas)
+│   ├── utils/          # Funções utilitárias
+│   └── constants/      # Constantes da aplicação
+│
+└── shared/             # Código compartilhado
+    ├── types/          # Tipos e interfaces compartilhadas
+    └── services/       # Serviços compartilhados
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Responsabilidades de Cada Camada
 
-## Learn more
+#### Domain
+- Contém as regras de negócio da aplicação
+- Define as entidades e suas propriedades
+- Define as interfaces dos repositórios
+- Contém os casos de uso que orquestram as operações
 
-To learn more about developing your project with Expo, look at the following resources:
+#### Data
+- Implementa o acesso a dados
+- Implementa os repositórios definidos no domínio
+- Gerencia a persistência de dados
+- Lida com transformação de dados
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+#### Presentation
+- Gerencia a interface do usuário
+- Contém os componentes React Native
+- Implementa os ViewModels que conectam UI com lógica
+- Gerencia o estado da UI
 
-## Join the community
+#### Core
+- Configurações globais
+- Injeção de dependências
+- Utilitários comuns
+- Constantes da aplicação
 
-Join our community of developers creating universal apps.
+#### Shared
+- Código compartilhado entre camadas
+- Tipos e interfaces comuns
+- Serviços compartilhados
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Princípios Aplicados
+
+### Clean Architecture
+- Separação clara de responsabilidades
+- Dependências apontam para dentro
+- Domínio independente de frameworks
+- Testabilidade em todas as camadas
+
+### MVVM (Model-View-ViewModel)
+- Model: Entidades e regras de negócio
+- View: Componentes React Native
+- ViewModel: Classes que gerenciam estado e lógica de UI
+
+### SOLID
+- Single Responsibility: Cada classe tem uma única responsabilidade
+- Open/Closed: Fácil estender sem modificar código existente
+- Liskov Substitution: Interfaces bem definidas
+- Interface Segregation: Interfaces pequenas e específicas
+- Dependency Inversion: Dependências injetadas via construtor
+
+## Tecnologias Utilizadas
+
+- React Native
+- TypeScript
+- MobX (Gerenciamento de Estado)
+- NativeWind (Estilização)
+- AsyncStorage (Persistência)
+
+## Como Executar
+
+1. Instale as dependências:
+```bash
+npm install
+```
+
+2. Execute o projeto:
+```bash
+npm start
+```
+
+3. Para desenvolvimento:
+```bash
+npm run dev
+```
+
+## Contribuindo
+
+1. Crie uma branch para sua feature
+2. Faça commit das mudanças
+3. Push para a branch
+4. Crie um Pull Request
+
+## Licença
+
+MIT
