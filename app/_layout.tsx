@@ -32,7 +32,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <StyledView className="flex-1 bg-white dark:bg-gray-900">
+      <StyledView className="flex-1 bg-white dark:bg-gray-900 pt-16">
         <Stack>
           <Stack.Screen 
             name="(tabs)" 

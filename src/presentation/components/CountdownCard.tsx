@@ -1,201 +1,235 @@
 import { Ionicons } from '@expo/vector-icons';
-import { styled } from 'nativewind';
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { useTheme } from '../../core/hooks/useTheme';
-import { Countdown, Event } from '../../domain/entities/Event';
-
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledPressable = styled(Pressable);
+import React, { useEffect, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
+import { Event } from '../../domain/entities/Event';
 
 interface CountdownCardProps {
   event: Event;
-  onDelete?: (id: string) => void;
-  onEdit?: (event: Event) => void;
+  variant: 'featured' | 'trending';
+  onDelete: (id: string) => void;
+  onEdit: (event: Event) => void;
 }
+
+const calculateCountdown = (eventDate: Date | string) => {
+  const now = new Date();
+  const date = new Date(eventDate);
+  const diff = date.getTime() - now.getTime();
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  return { days, hours, minutes };
+};
 
 export const CountdownCard: React.FC<CountdownCardProps> = ({
   event,
+  variant,
   onDelete,
   onEdit,
 }) => {
-  const { theme } = useTheme();
-  const [countdown, setCountdown] = useState<Countdown>(() => {
-    const eventDate = new Date(event.date);
-    return calculateCountdown(eventDate);
-  });
-  const timerRef = useRef<NodeJS.Timeout>();
+  const [countdown, setCountdown] = useState(calculateCountdown(event.date));
 
   useEffect(() => {
-    const eventDate = new Date(event.date);
-    
-    // Limpa o timer anterior se existir
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
+    const timer = setInterval(() => {
+      setCountdown(calculateCountdown(event.date));
+    }, 60000); // Atualiza a cada minuto
 
-    // Atualiza o countdown imediatamente
-    setCountdown(calculateCountdown(eventDate));
-
-    // Cria um novo timer
-    timerRef.current = setInterval(() => {
-      setCountdown(calculateCountdown(eventDate));
-    }, 1000);
-
-    // Cleanup function
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
+    return () => clearInterval(timer);
   }, [event.date]);
 
-  const calculateCountdown = (eventDate: Date): Countdown => {
-    const now = new Date();
-    const diff = eventDate.getTime() - now.getTime();
-    const isOverdue = diff < 0;
+  if (variant === 'featured') {
+    return (
+      <View
+        style={{
+          borderRadius: BORDER_RADIUS.xl,
+          overflow: 'hidden',
+          ...SHADOWS.medium,
+          marginBottom: 8,
+        }}
+      >
+        {/* Background Color or Image */}
+        <View style={{
+          height: 200,
+          backgroundColor: event.color,
+          overflow: 'hidden',
+        }}>
+          {event.imageUri && (
+            <Image
+              source={{ uri: event.imageUri }}
+              style={{
+                width: '100%',
+                height: '100%',
+                opacity: 0.8, // Deixa a imagem um pouco mais escura para melhor contraste
+              }}
+              resizeMode="cover"
+            />
+          )}
+          {/* Overlay para garantir contraste */}
+          <View style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: event.color,
+            opacity: event.imageUri ? 0.3 : 1,
+          }} />
+        </View>
 
-    const days = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((Math.abs(diff) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((Math.abs(diff) % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((Math.abs(diff) % (1000 * 60)) / 1000);
+        {/* Content */}
+        <View
+          style={{
+            backgroundColor: COLORS.surface,
+            padding: 16,
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+              {event.name}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Pressable
+                onPress={() => onEdit(event)}
+                style={{
+                  padding: 8,
+                  borderRadius: BORDER_RADIUS.round,
+                  backgroundColor: COLORS.background,
+                }}
+              >
+                <Ionicons name="pencil" size={20} color={COLORS.text.secondary} />
+              </Pressable>
+              <Pressable
+                onPress={() => onDelete(event.id)}
+                style={{
+                  padding: 8,
+                  borderRadius: BORDER_RADIUS.round,
+                  backgroundColor: COLORS.background,
+                }}
+              >
+                <Ionicons name="trash" size={20} color={COLORS.text.secondary} />
+              </Pressable>
+            </View>
+          </View>
 
-    return {
-      days,
-      hours,
-      minutes,
-      seconds,
-      isOverdue,
-    };
-  };
+          {event.description && (
+            <Text
+              style={{
+                ...TYPOGRAPHY.body.medium,
+                color: COLORS.text.secondary,
+                marginBottom: 16,
+              }}
+              numberOfLines={2}
+            >
+              {event.description}
+            </Text>
+          )}
+
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+                {countdown.days}
+              </Text>
+              <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
+                days
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+                {countdown.hours}
+              </Text>
+              <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
+                hours
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+                {countdown.minutes}
+              </Text>
+              <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
+                minutes
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
-    <StyledView className="rounded-lg p-4 mb-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-      <StyledView className="flex-row justify-between items-start">
-        <StyledView className="flex-1 flex-row items-start space-x-3">
-          <StyledView 
-            className="p-2 rounded-lg mt-1"
-            style={{ backgroundColor: `${event.color || theme.colors.primary}10` }}
-          >
-            <Ionicons
-              name={event.icon as any}
-              size={18}
-              color={event.color || theme.colors.primary}
-            />
-          </StyledView>
-          <StyledView className="flex-1">
-            <StyledText
-              className="text-base font-medium"
-              style={{ color: theme.colors.text }}
-            >
-              {event.name}
-            </StyledText>
-            <StyledText
-              className="text-sm mt-1"
-              style={{ color: theme.colors.textSecondary }}
-            >
-              {new Date(event.date).toLocaleDateString()}
-            </StyledText>
-            {event.description && (
-              <StyledText
-                className="text-sm mt-2"
-                style={{ color: theme.colors.textSecondary }}
-                numberOfLines={2}
-              >
-                {event.description}
-              </StyledText>
-            )}
-          </StyledView>
-        </StyledView>
-        <StyledView className="flex-row space-x-2">
-          {onEdit && (
-            <StyledPressable
-              onPress={() => onEdit(event)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <Ionicons
-                name="pencil-outline"
-                size={16}
-                color={theme.colors.textSecondary}
-              />
-            </StyledPressable>
-          )}
-          {onDelete && (
-            <StyledPressable
-              onPress={() => onDelete(event.id)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <Ionicons
-                name="trash-outline"
-                size={16}
-                color={theme.colors.error}
-              />
-            </StyledPressable>
-          )}
-        </StyledView>
-      </StyledView>
+    <View
+      style={{
+        flexDirection: 'row',
+        backgroundColor: COLORS.surface,
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+        marginBottom: 12,
+        height: 100, // Altura fixa para os cards menores
+        ...SHADOWS.small,
+      }}
+    >
+      {/* Color Block or Image */}
+      <View
+        style={{
+          width: 100,
+          backgroundColor: event.color,
+          overflow: 'hidden',
+        }}
+      >
+        {event.imageUri && (
+          <Image
+            source={{ uri: event.imageUri }}
+            style={{
+              width: '100%',
+              height: '100%',
+              opacity: 0.8,
+            }}
+            resizeMode="cover"
+          />
+        )}
+        {/* Overlay */}
+        <View style={{
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor: event.color,
+          opacity: event.imageUri ? 0.3 : 1,
+        }} />
+      </View>
 
-      <StyledView className="flex-row items-center mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-        <StyledView className="flex-row items-center space-x-4">
-          <StyledView className="items-center">
-            <StyledText
-              className="text-lg font-semibold"
-              style={{ color: event.color || theme.colors.primary }}
+      {/* Content */}
+      <View style={{ flex: 1, padding: 12, justifyContent: 'space-between' }}>
+        <View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text style={{ ...TYPOGRAPHY.heading.h3, color: COLORS.text.primary }}>
+              {event.name}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Pressable onPress={() => onEdit(event)}>
+                <Ionicons name="pencil" size={16} color={COLORS.text.secondary} />
+              </Pressable>
+              <Pressable onPress={() => onDelete(event.id)}>
+                <Ionicons name="trash" size={16} color={COLORS.text.secondary} />
+              </Pressable>
+            </View>
+          </View>
+
+          {event.description && (
+            <Text 
+              style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}
+              numberOfLines={1}
             >
-              {countdown.days}
-            </StyledText>
-            <StyledText
-              className="text-xs"
-              style={{ color: theme.colors.textSecondary }}
-            >
-              Days
-            </StyledText>
-          </StyledView>
-          <StyledView className="items-center">
-            <StyledText
-              className="text-lg font-semibold"
-              style={{ color: event.color || theme.colors.primary }}
-            >
-              {countdown.hours}
-            </StyledText>
-            <StyledText
-              className="text-xs"
-              style={{ color: theme.colors.textSecondary }}
-            >
-              Hours
-            </StyledText>
-          </StyledView>
-          <StyledView className="items-center">
-            <StyledText
-              className="text-lg font-semibold"
-              style={{ color: event.color || theme.colors.primary }}
-            >
-              {countdown.minutes}
-            </StyledText>
-            <StyledText
-              className="text-xs"
-              style={{ color: theme.colors.textSecondary }}
-            >
-              Minutes
-            </StyledText>
-          </StyledView>
-          <StyledView className="items-center">
-            <StyledText
-              className="text-lg font-semibold"
-              style={{ color: event.color || theme.colors.primary }}
-            >
-              {countdown.seconds}
-            </StyledText>
-            <StyledText
-              className="text-xs"
-              style={{ color: theme.colors.textSecondary }}
-            >
-              Seconds
-            </StyledText>
-          </StyledView>
-        </StyledView>
-      </StyledView>
-    </StyledView>
+              {event.description}
+            </Text>
+          )}
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, fontWeight: '600' }}>
+            {countdown.days}d {countdown.hours}h
+          </Text>
+          {event.category && (
+            <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
+              • {event.category}
+            </Text>
+          )}
+        </View>
+      </View>
+    </View>
   );
 }; 

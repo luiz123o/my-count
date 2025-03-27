@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { v4 as uuidv4 } from 'uuid';
+import * as Crypto from 'expo-crypto';
 import { Event } from '../../domain/entities/Event';
 import { IEventRepository } from '../../domain/repositories/IEventRepository';
 
@@ -46,7 +46,7 @@ export class EventRepository implements IEventRepository {
     const events = await this.getEventsFromStorage();
     const newEvent: Event = {
       ...event,
-      id: uuidv4(),
+      id: Crypto.randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };

@@ -1,19 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FlatList, Pressable, SafeAreaView, Text, TextInput, View } from 'react-native';
+import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 import { homeViewModel } from '../../core/config/di';
-import { useTheme } from '../../core/hooks/useTheme';
 import { Event } from '../../domain/entities/Event';
 import { CountdownCard } from '../components/CountdownCard';
 import { EventForm } from '../components/EventForm';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { useUIStore } from '../stores/ui.store';
 
 const HomeScreen = observer(() => {
-  const { theme } = useTheme();
   const [events, setEvents] = useState<Event[]>([]);
-  const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { isAddEventModalVisible, setAddEventModalVisible } = useUIStore();
 
   useEffect(() => {
     loadEvents();
@@ -27,14 +27,14 @@ const HomeScreen = observer(() => {
   const handleAddEvent = async (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => {
     await homeViewModel.createEvent(event);
     loadEvents();
-    setIsFormVisible(false);
+    setAddEventModalVisible(false);
   };
 
   const handleEditEvent = async (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (editingEvent) {
       await homeViewModel.updateEvent(editingEvent.id, event);
       loadEvents();
-      setIsFormVisible(false);
+      setAddEventModalVisible(false);
       setEditingEvent(undefined);
     }
   };
@@ -46,102 +46,182 @@ const HomeScreen = observer(() => {
 
   const handleEditPress = (event: Event) => {
     setEditingEvent(event);
-    setIsFormVisible(true);
+    setAddEventModalVisible(true);
   };
 
-  return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
-      {/* Sidebar */}
-      <View className="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-        <View className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <Text className="text-xl font-bold text-gray-900 dark:text-white">
-            Countdowns
-          </Text>
-        </View>
-        <View className="p-4">
-          <Pressable 
-            onPress={() => setIsFormVisible(true)}
-            className="flex-row items-center space-x-2 px-4 py-2 bg-blue-600 rounded-lg"
-          >
-            <Ionicons name="add" size={20} color="white" />
-            <Text className="text-white font-medium">New Event</Text>
-          </Pressable>
-        </View>
-        <View className="px-4">
-          <View className="flex-row items-center space-x-2 py-2">
-            <Ionicons name="time-outline" size={20} color={theme.colors.textSecondary} />
-            <Text style={{ color: theme.colors.textSecondary }}>Upcoming</Text>
-          </View>
-          <View className="flex-row items-center space-x-2 py-2">
-            <Ionicons name="calendar-outline" size={20} color={theme.colors.textSecondary} />
-            <Text style={{ color: theme.colors.textSecondary }}>Calendar</Text>
-          </View>
-        </View>
+  // Ordenar eventos por data e filtrar por busca
+  const { nextEvent, otherEvents } = useMemo(() => {
+    const filteredEvents = events
+      .filter(event => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          event.name.toLowerCase().includes(searchLower) ||
+          event.description?.toLowerCase().includes(searchLower) ||
+          event.category?.toLowerCase().includes(searchLower)
+        );
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    return {
+      nextEvent: filteredEvents[0],
+      otherEvents: filteredEvents.slice(1)
+    };
+  }, [events, searchQuery]);
+
+  const renderHeader = () => (
+    <View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
+      {/* Top Bar */}
+      <View style={{ 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 24,
+        marginTop: 12,
+      }}>
+        <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+          My Events
+        </Text>
+        <Pressable
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: BORDER_RADIUS.round,
+            backgroundColor: COLORS.surface,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons name="notifications-outline" size={24} color={COLORS.text.secondary} />
+        </Pressable>
       </View>
 
-      {/* Main Content */}
-      <View className="flex-1">
-        <View className="flex-row items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <View className="flex-row items-center space-x-4">
-            <Text className="text-lg font-semibold text-gray-900 dark:text-white">
-              Upcoming Events
-            </Text>
-            <View className="ml-2">
-              <ThemeToggle />
-            </View>
-          </View>
-        </View>
-
-        {/* Lista de Eventos */}
-        <FlatList
-          data={events}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <CountdownCard
-              event={item}
-              onDelete={handleDeleteEvent}
-              onEdit={handleEditPress}
-            />
-          )}
-          contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center p-8">
-              <View className="bg-gray-100 dark:bg-gray-800 rounded-full p-6 mb-4">
-                <Ionicons
-                  name="calendar-outline"
-                  size={64}
-                  color={theme.colors.textSecondary}
-                />
-              </View>
-              <Text
-                className="text-xl font-semibold mt-4 text-center"
-                style={{ color: theme.colors.text }}
-              >
-                No events yet
-              </Text>
-              <Text
-                className="text-base text-center mt-2"
-                style={{ color: theme.colors.textSecondary }}
-              >
-                Create your first event to get started
-              </Text>
-            </View>
-          }
+      {/* Search Bar */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: COLORS.surface,
+          borderRadius: BORDER_RADIUS.lg,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          marginBottom: 32,
+          ...SHADOWS.small,
+        }}
+      >
+        <Ionicons name="search-outline" size={20} color={COLORS.text.secondary} />
+        <TextInput
+          placeholder="Search events"
+          placeholderTextColor={COLORS.text.secondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={{
+            flex: 1,
+            marginLeft: 12,
+            ...TYPOGRAPHY.body.medium,
+            color: COLORS.text.primary,
+          }}
         />
       </View>
 
-      {/* Modal do Formulário */}
-      {isFormVisible && (
+      {/* Next Event Section */}
+      {nextEvent && (
+        <>
+          <Text style={{ 
+            ...TYPOGRAPHY.heading.h2, 
+            color: COLORS.text.primary, 
+            marginBottom: 16,
+            marginLeft: 4,
+          }}>
+            Next Event
+          </Text>
+          <CountdownCard
+            key={nextEvent.id}
+            event={nextEvent}
+            variant="featured"
+            onDelete={handleDeleteEvent}
+            onEdit={handleEditPress}
+          />
+        </>
+      )}
+
+      {/* Other Events Section Title */}
+      {otherEvents.length > 0 && (
+        <Text style={{ 
+          ...TYPOGRAPHY.heading.h2, 
+          color: COLORS.text.primary,
+          marginTop: 32,
+          marginBottom: 16,
+          marginLeft: 4,
+        }}>
+          Other Events
+        </Text>
+      )}
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+      <View style={{ 
+        backgroundColor: COLORS.surface,
+        borderRadius: BORDER_RADIUS.round,
+        padding: 24,
+        marginBottom: 16,
+      }}>
+        <Ionicons name="calendar-outline" size={64} color={COLORS.text.secondary} />
+      </View>
+      <Text style={{ ...TYPOGRAPHY.heading.h3, color: COLORS.text.primary, textAlign: 'center' }}>
+        No events yet
+      </Text>
+      <Text style={{ 
+        ...TYPOGRAPHY.body.medium, 
+        color: COLORS.text.secondary,
+        textAlign: 'center',
+        marginTop: 8,
+        marginBottom: 24,
+      }}>
+        Create your first event to get started
+      </Text>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <FlatList
+        data={otherEvents}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={{ paddingHorizontal: 20 }}>
+            <CountdownCard
+              event={item}
+              variant="trending"
+              onDelete={handleDeleteEvent}
+              onEdit={handleEditPress}
+            />
+          </View>
+        )}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={events.length === 0 ? renderEmptyState : null}
+        contentContainerStyle={{ 
+          flexGrow: 1,
+          paddingBottom: 100, // Aumentado para dar mais espaço para o botão e último item
+        }}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        overScrollMode="never"
+      />
+
+      {/* Event Form Modal */}
+      {isAddEventModalVisible && (
         <EventForm
           event={editingEvent}
           onSubmit={editingEvent ? handleEditEvent : handleAddEvent}
           onCancel={() => {
-            setIsFormVisible(false);
+            setAddEventModalVisible(false);
             setEditingEvent(undefined);
           }}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 });
 

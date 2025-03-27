@@ -1,278 +1,410 @@
 import { Ionicons } from '@expo/vector-icons';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { styled } from 'nativewind';
-import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useEffect, useState } from 'react';
+import {
+    Image,
+    Modal,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View
+} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { z } from 'zod';
-import { useTheme } from '../../core/hooks/useTheme';
+import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 import { Event } from '../../domain/entities/Event';
-import { eventColors, eventIcons } from '../../shared/types/theme';
-import { EventCustomization } from './EventCustomization';
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledTextInput = styled(TextInput);
-const StyledPressable = styled(Pressable);
+const ICON_OPTIONS = [
+  { name: 'calendar-outline', label: 'Calendar' },
+  { name: 'gift-outline', label: 'Gift' },
+  { name: 'airplane-outline', label: 'Travel' },
+  { name: 'school-outline', label: 'Education' },
+  { name: 'heart-outline', label: 'Love' },
+  { name: 'star-outline', label: 'Star' },
+  { name: 'trophy-outline', label: 'Trophy' },
+];
+
+const COLOR_OPTIONS = [
+  '#4F46E5', // Indigo
+  '#10B981', // Emerald
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#8B5CF6', // Purple
+  '#EC4899', // Pink
+  '#06B6D4', // Cyan
+  '#F97316', // Orange
+];
 
 interface EventFormProps {
   event?: Event;
-  onSubmit: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onCancel: () => void;
 }
-
-// Schema de validação com Zod
-const eventSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  date: z.date().refine(date => date > new Date(), {
-    message: 'A data deve ser no futuro',
-  }),
-  description: z.string().optional(),
-  category: z.string().optional(),
-  color: z.string(),
-  icon: z.string(),
-});
-
-// Tipo inferido do schema
-type EventFormData = z.infer<typeof eventSchema>;
 
 export const EventForm: React.FC<EventFormProps> = ({
   event,
   onSubmit,
   onCancel,
 }) => {
-  const { theme } = useTheme();
-  const [isDatePickerVisible, setDatePickerVisible] = React.useState(false);
+  const [name, setName] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[0]);
+  const [selectedIcon, setSelectedIcon] = useState(ICON_OPTIONS[0].name);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
-  // Configurar React Hook Form com Zod
-  const { 
-    control, 
-    handleSubmit, 
-    formState: { errors }, 
-    setValue,
-    watch
-  } = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: {
-      name: event?.name || '',
-      date: event?.date || new Date(),
-      description: event?.description || '',
-      category: event?.category || '',
-      color: event?.color || eventColors[0],
-      icon: event?.icon || eventIcons[0],
-    },
-  });
+  useEffect(() => {
+    if (event) {
+      setName(event.name);
+      setDate(new Date(event.date));
+      setDescription(event.description || '');
+      setCategory(event.category || '');
+      setSelectedColor(event.color || COLOR_OPTIONS[0]);
+      setSelectedIcon(event.icon || ICON_OPTIONS[0].name);
+      setImageUri(event.imageUri || null);
+    }
+  }, [event]);
 
-  // Observar mudanças no color e icon para atualização
-  const selectedColor = watch('color');
-  const selectedIcon = watch('icon');
+  const handleSubmit = () => {
+    if (!name.trim()) return;
 
-  const showDatePicker = () => {
-    setDatePickerVisible(true);
+    onSubmit({
+      name: name.trim(),
+      date,
+      description: description.trim() || undefined,
+      category: category.trim() || undefined,
+      color: selectedColor,
+      icon: selectedIcon,
+      imageUri: imageUri || undefined,
+    });
   };
 
-  const hideDatePicker = () => {
-    setDatePickerVisible(false);
+  const handleConfirmDate = (selectedDate: Date) => {
+    setShowDatePicker(false);
+    setDate(selectedDate);
   };
 
-  const handleConfirm = (selectedDate: Date) => {
-    setValue('date', selectedDate);
-    hideDatePicker();
+  const handleCancelDate = () => {
+    setShowDatePicker(false);
   };
 
-  const onFormSubmit = (data: EventFormData) => {
-    onSubmit(data);
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const formatDateTime = (date: Date) => {
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
     <Modal
-      visible={true}
       animationType="slide"
-      presentationStyle="pageSheet"
+      transparent={true}
+      visible={true}
       onRequestClose={onCancel}
     >
-      <StyledView
-        className="flex-1 p-6"
-        style={{ backgroundColor: theme.colors.background }}
-      >
-        <StyledView className="flex-row justify-between items-center mb-6">
-          <StyledText
-            className="text-2xl font-bold"
-            style={{ color: theme.colors.text }}
-          >
-            {event ? 'Editar Evento' : 'Novo Evento'}
-          </StyledText>
-          <StyledPressable onPress={onCancel}>
-            <Ionicons
-              name="close"
-              size={24}
-              color={theme.colors.text}
-            />
-          </StyledPressable>
-        </StyledView>
-
-        <StyledView className="space-y-4">
-          <StyledView>
-            <StyledText
-              className="text-sm font-medium mb-1"
-              style={{ color: theme.colors.text }}
-            >
-              Nome do Evento
-            </StyledText>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <StyledTextInput
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Digite o nome do evento"
-                  className={`p-3 rounded-lg border ${errors.name ? 'border-red-500' : ''}`}
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: COLORS.background,
+            marginTop: 60,
+            borderTopLeftRadius: BORDER_RADIUS.xl,
+            borderTopRightRadius: BORDER_RADIUS.xl,
+            ...SHADOWS.medium,
+          }}
+        >
+          <ScrollView>
+            <View style={{ padding: 24 }}>
+              {/* Header */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 24,
+                }}
+              >
+                <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+                  {event ? 'Edit Event' : 'New Event'}
+                </Text>
+                <Pressable
+                  onPress={onCancel}
                   style={{
-                    backgroundColor: theme.colors.card,
-                    borderColor: errors.name ? theme.colors.error : theme.colors.border,
-                    color: theme.colors.text,
+                    padding: 8,
+                    borderRadius: BORDER_RADIUS.round,
+                    backgroundColor: COLORS.surface,
                   }}
-                  placeholderTextColor={theme.colors.textSecondary}
-                />
-              )}
-            />
-            {errors.name && (
-              <StyledText className="text-xs mt-1" style={{ color: theme.colors.error }}>
-                {errors.name.message}
-              </StyledText>
-            )}
-          </StyledView>
+                >
+                  <Ionicons name="close" size={24} color={COLORS.text.secondary} />
+                </Pressable>
+              </View>
 
-          <StyledView>
-            <StyledText
-              className="text-sm font-medium mb-1"
-              style={{ color: theme.colors.text }}
-            >
-              Data e Hora
-            </StyledText>
-            <Controller
-              control={control}
-              name="date"
-              render={({ field: { value } }) => (
-                <>
-                  <StyledPressable
-                    onPress={showDatePicker}
-                    className={`p-3 rounded-lg border flex-row justify-between items-center ${errors.date ? 'border-red-500' : ''}`}
+              {/* Form Fields */}
+              <View style={{ gap: 20 }}>
+                {/* Image Picker */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Event Image (Optional)
+                  </Text>
+                  <Pressable
+                    onPress={pickImage}
                     style={{
-                      backgroundColor: theme.colors.card,
-                      borderColor: errors.date ? theme.colors.error : theme.colors.border,
+                      height: 200,
+                      borderRadius: BORDER_RADIUS.lg,
+                      backgroundColor: COLORS.surface,
+                      borderWidth: 1,
+                      borderColor: COLORS.border,
+                      borderStyle: 'dashed',
+                      overflow: 'hidden',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    <StyledText style={{ color: theme.colors.text }}>
-                      {value.toLocaleString()}
-                    </StyledText>
-                    <Ionicons
-                      name="calendar-outline"
-                      size={20}
-                      color={theme.colors.text}
-                    />
-                  </StyledPressable>
-                  
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="datetime"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                    date={value}
-                    minimumDate={new Date()}
-                    buttonTextColorIOS={theme.colors.primary}
-                    confirmTextIOS="Confirmar"
-                    cancelTextIOS="Cancelar"
+                    {imageUri ? (
+                      <Image
+                        source={{ uri: imageUri }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                        }}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={{ alignItems: 'center' }}>
+                        <Ionicons name="image-outline" size={32} color={COLORS.text.secondary} />
+                        <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.secondary, marginTop: 8 }}>
+                          Tap to add image
+                        </Text>
+                      </View>
+                    )}
+                  </Pressable>
+                </View>
+
+                {/* Event Name */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Event Name
+                  </Text>
+                  <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Enter event name"
+                    placeholderTextColor={COLORS.text.secondary}
+                    style={{
+                      ...TYPOGRAPHY.body.large,
+                      color: COLORS.text.primary,
+                      backgroundColor: COLORS.surface,
+                      borderRadius: BORDER_RADIUS.lg,
+                      padding: 16,
+                      borderWidth: 1,
+                      borderColor: COLORS.border,
+                    }}
                   />
-                </>
-              )}
-            />
-            {errors.date && (
-              <StyledText className="text-xs mt-1" style={{ color: theme.colors.error }}>
-                {errors.date.message}
-              </StyledText>
-            )}
-          </StyledView>
+                </View>
 
-          <StyledView>
-            <StyledText
-              className="text-sm font-medium mb-1"
-              style={{ color: theme.colors.text }}
-            >
-              Descrição
-            </StyledText>
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <StyledTextInput
-                  value={value || ''}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Adicione uma descrição (opcional)"
-                  className="p-3 rounded-lg border"
-                  style={{
-                    backgroundColor: theme.colors.card,
-                    borderColor: theme.colors.border,
-                    color: theme.colors.text,
-                  }}
-                  placeholderTextColor={theme.colors.textSecondary}
-                  multiline
-                  numberOfLines={3}
+                {/* Date Picker */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Date and Time
+                  </Text>
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: COLORS.surface,
+                      borderRadius: BORDER_RADIUS.lg,
+                      padding: 16,
+                      borderWidth: 1,
+                      borderColor: COLORS.border,
+                    }}
+                  >
+                    <Text style={{ ...TYPOGRAPHY.body.large, color: COLORS.text.primary }}>
+                      {formatDateTime(date)}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={20} color={COLORS.text.secondary} />
+                  </Pressable>
+                </View>
+
+                <DateTimePickerModal
+                  isVisible={showDatePicker}
+                  mode="datetime"
+                  onConfirm={handleConfirmDate}
+                  onCancel={handleCancelDate}
+                  date={date}
+                  minimumDate={new Date()}
                 />
-              )}
-            />
-          </StyledView>
 
-          <StyledView>
-            <StyledText
-              className="text-sm font-medium mb-1"
-              style={{ color: theme.colors.text }}
-            >
-              Categoria
-            </StyledText>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <StyledTextInput
-                  value={value || ''}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Adicione uma categoria (opcional)"
-                  className="p-3 rounded-lg border"
+                {/* Description */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Description (Optional)
+                  </Text>
+                  <TextInput
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholder="Add a description"
+                    placeholderTextColor={COLORS.text.secondary}
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                    style={{
+                      ...TYPOGRAPHY.body.large,
+                      color: COLORS.text.primary,
+                      backgroundColor: COLORS.surface,
+                      borderRadius: BORDER_RADIUS.lg,
+                      padding: 16,
+                      height: 120,
+                      borderWidth: 1,
+                      borderColor: COLORS.border,
+                    }}
+                  />
+                </View>
+
+                {/* Category */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Category (Optional)
+                  </Text>
+                  <TextInput
+                    value={category}
+                    onChangeText={setCategory}
+                    placeholder="Add a category"
+                    placeholderTextColor={COLORS.text.secondary}
+                    style={{
+                      ...TYPOGRAPHY.body.large,
+                      color: COLORS.text.primary,
+                      backgroundColor: COLORS.surface,
+                      borderRadius: BORDER_RADIUS.lg,
+                      padding: 16,
+                      borderWidth: 1,
+                      borderColor: COLORS.border,
+                    }}
+                  />
+                </View>
+
+                {/* Color Selection */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Background Color
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                    {COLOR_OPTIONS.map((color) => (
+                      <Pressable
+                        key={color}
+                        onPress={() => setSelectedColor(color)}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: BORDER_RADIUS.round,
+                          backgroundColor: color,
+                          borderWidth: selectedColor === color ? 3 : 0,
+                          borderColor: COLORS.background,
+                          ...SHADOWS.small,
+                        }}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                {/* Icon Selection */}
+                <View>
+                  <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
+                    Icon
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                    {ICON_OPTIONS.map((icon) => (
+                      <Pressable
+                        key={icon.name}
+                        onPress={() => setSelectedIcon(icon.name)}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: BORDER_RADIUS.round,
+                          backgroundColor: selectedIcon === icon.name ? selectedColor : COLORS.surface,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderWidth: 1,
+                          borderColor: COLORS.border,
+                        }}
+                      >
+                        <Ionicons
+                          name={icon.name as any}
+                          size={24}
+                          color={selectedIcon === icon.name ? COLORS.text.light : COLORS.text.secondary}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              </View>
+
+              {/* Action Buttons */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  gap: 12,
+                  marginTop: 32,
+                }}
+              >
+                <Pressable
+                  onPress={onCancel}
                   style={{
-                    backgroundColor: theme.colors.card,
-                    borderColor: theme.colors.border,
-                    color: theme.colors.text,
+                    paddingHorizontal: 20,
+                    paddingVertical: 12,
+                    borderRadius: BORDER_RADIUS.round,
+                    backgroundColor: COLORS.surface,
                   }}
-                  placeholderTextColor={theme.colors.textSecondary}
-                />
-              )}
-            />
-          </StyledView>
-
-          <EventCustomization
-            selectedColor={selectedColor}
-            selectedIcon={selectedIcon}
-            onColorSelect={(color) => setValue('color', color)}
-            onIconSelect={(icon) => setValue('icon', icon)}
-          />
-
-          <StyledPressable
-            onPress={handleSubmit(onFormSubmit)}
-            className="bg-primary p-4 rounded-lg mt-4"
-            style={{ backgroundColor: theme.colors.primary }}
-          >
-            <StyledText className="text-white text-center font-medium">
-              {event ? 'Salvar Alterações' : 'Criar Evento'}
-            </StyledText>
-          </StyledPressable>
-        </StyledView>
-      </StyledView>
+                >
+                  <Text style={{ ...TYPOGRAPHY.body.large, color: COLORS.text.primary }}>
+                    Cancel
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleSubmit}
+                  style={{
+                    paddingHorizontal: 20,
+                    paddingVertical: 12,
+                    borderRadius: BORDER_RADIUS.round,
+                    backgroundColor: selectedColor,
+                  }}
+                >
+                  <Text style={{ ...TYPOGRAPHY.body.large, color: COLORS.text.light }}>
+                    {event ? 'Save Changes' : 'Create Event'}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
     </Modal>
   );
 }; 

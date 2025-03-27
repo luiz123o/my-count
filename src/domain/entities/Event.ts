@@ -1,13 +1,18 @@
 export interface Event {
   id: string;
   name: string;
-  date: Date;
+  date: string | Date;
   description?: string;
   category?: string;
-  color?: string;
+  color: string;
+  imageUri?: string;
   icon?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  imageUrl?: string;
+  location?: string;
+  price?: number;
+  attendees?: number;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface Countdown {

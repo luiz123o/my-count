@@ -1,31 +1,102 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
-import { Colors } from '../../constants/Colors';
-import { useColorScheme } from '../../hooks/useColorScheme';
+import { Pressable, View } from 'react-native';
+import { BORDER_RADIUS, COLORS } from '../../src/constants/theme';
+import type { UIStore } from '../../src/presentation/stores/ui.store';
+import { useUIStore } from '../../src/presentation/stores/ui.store';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const setAddEventModalVisible = useUIStore((state: UIStore) => state.setAddEventModalVisible);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: true,
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 34,
+          backgroundColor: COLORS.background,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.border,
+          paddingHorizontal: 16,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Countdowns',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time-outline" size={size} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <View style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 4,
+            }}>
+              <Ionicons 
+                name={focused ? "home" : "home-outline"} 
+                size={24} 
+                color={focused ? COLORS.primary : COLORS.text.secondary} 
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="add"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Pressable
+              style={({ pressed }) => ({
+                width: 60,
+                height: 60,
+                backgroundColor: pressed ? COLORS.primaryDark : COLORS.primary,
+                borderRadius: BORDER_RADIUS.round,
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: [{ translateY: -20 }],
+                borderWidth: 4,
+                borderColor: COLORS.background,
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.15,
+                shadowRadius: 3.84,
+                elevation: 3,
+              })}
+              onPress={() => setAddEventModalVisible(true)}
+            >
+              <Ionicons name="add" size={32} color={COLORS.text.light} />
+            </Pressable>
+          ),
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+          },
+        })}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 2,
+            }}>
+              <Ionicons 
+                name={focused ? "settings" : "settings-outline"} 
+                size={24} 
+                color={focused ? COLORS.primary : COLORS.text.secondary} 
+              />
+            </View>
           ),
         }}
       />
