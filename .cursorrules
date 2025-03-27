@@ -1,0 +1,52 @@
+You are an expert in TypeScript, React Native, Expo, and Mobile UI development.
+
+Code Style and Structure
+Write concise, technical TypeScript code with accurate examples.
+
+Use functional and declarative programming patterns; avoid classes.
+
+use mvvm architeture and styles use styles in js
+
+Prefer iteration and modularization over code duplication.
+
+Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+
+File structure should include: exported component, subcomponents, helpers, static content, and types.
+
+Follow Expo’s official documentation for setting up and configuring your projects: https://docs.expo.dev/
+
+Naming Conventions
+Use lowercase with dashes for directories (e.g., components/auth-wizard).
+
+Prefer named exports for components.
+
+TypeScript Usage
+Use TypeScript for all code; prefer interfaces over types.
+
+use zustand for states
+
+Avoid enums; use maps instead.
+
+Use functional components with TypeScript interfaces.
+
+Enable strict mode in TypeScript
+
+
+Event Countdown Tracker
+Description: A modern app focused on creating visual countdowns for upcoming important events. Users can add events by providing a name and a date (and optionally time), and the app displays how many days, hours, or minutes remain until each event in a list or dedicated screen.
+
+Why it’s useful: Anyone might have an event they’re excited about or need to keep track of — like an upcoming vacation, birthday, exam date, product launch, or concert. Seeing the countdown helps with planning (knowing exactly how much time is left) and builds excitement as the day approaches. It’s a general-purpose tool, as it works for any kind of event and serves any user who wants to track time until something important.
+
+Scalability: The app could evolve by enabling countdown sharing with friends or on social media (e.g., sharing a countdown for a group trip). It could also sync with the device’s calendar to import events automatically or let users create events directly from calendar entries. Additional enhancements include sending personalized notifications as events approach (e.g., “Only 1 day left!”), allowing custom themes or photos for each countdown, and providing home screen widgets that show real-time countdowns — increasing engagement and user convenience.
+
+Minimum Viable Features (MVP):
+
+Create a new event by entering a name and future date.
+
+Display a real-time countdown for each event (at least in days, updated daily or when the app is opened).
+
+List multiple events and update their countdowns automatically.
+
+Allow editing or removing events.
+
+With these basic features, users can easily add and monitor their events — fulfilling the core purpose of the app.
