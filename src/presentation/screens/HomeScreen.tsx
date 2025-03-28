@@ -1,7 +1,8 @@
 import { CountdownCard } from '@components/CountdownCard';
 import { EventForm } from '@components/EventForm';
-import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '@constants/theme';
+import { BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '@constants/theme';
 import { homeViewModel } from '@core/config/di';
+import { useThemeStore } from '@core/hooks/useTheme';
 import { Event } from '@domain/entities/Event';
 import { Ionicons } from '@expo/vector-icons';
 import { useUIStore } from '@stores/ui.store';
@@ -14,6 +15,7 @@ const HomeScreen = observer(() => {
   const [editingEvent, setEditingEvent] = useState<Event | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const { isAddEventModalVisible, setAddEventModalVisible } = useUIStore();
+  const { colors, mode } = useThemeStore();
 
   useEffect(() => {
     loadEvents();
@@ -78,7 +80,10 @@ const HomeScreen = observer(() => {
         marginBottom: 24,
         marginTop: 12,
       }}>
-        <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
+        <Text style={{ 
+          ...TYPOGRAPHY.heading.h2, 
+          color: colors.text,
+        }}>
           My Events
         </Text>
         <Pressable
@@ -86,12 +91,16 @@ const HomeScreen = observer(() => {
             width: 40,
             height: 40,
             borderRadius: BORDER_RADIUS.round,
-            backgroundColor: COLORS.surface,
+            backgroundColor: colors.card,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Ionicons name="notifications-outline" size={24} color={COLORS.text.secondary} />
+          <Ionicons 
+            name="notifications-outline" 
+            size={24} 
+            color={colors.text}
+          />
         </Pressable>
       </View>
 
@@ -100,7 +109,7 @@ const HomeScreen = observer(() => {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: COLORS.surface,
+          backgroundColor: colors.card,
           borderRadius: BORDER_RADIUS.lg,
           paddingHorizontal: 16,
           paddingVertical: 12,
@@ -108,17 +117,21 @@ const HomeScreen = observer(() => {
           ...SHADOWS.small,
         }}
       >
-        <Ionicons name="search-outline" size={20} color={COLORS.text.secondary} />
+        <Ionicons 
+          name="search-outline" 
+          size={20} 
+          color={colors.text}
+        />
         <TextInput
           placeholder="Search events"
-          placeholderTextColor={COLORS.text.secondary}
+          placeholderTextColor={colors.border}
           value={searchQuery}
           onChangeText={setSearchQuery}
           style={{
             flex: 1,
             marginLeft: 12,
             ...TYPOGRAPHY.body.medium,
-            color: COLORS.text.primary,
+            color: colors.text,
           }}
         />
       </View>
@@ -128,7 +141,7 @@ const HomeScreen = observer(() => {
         <>
           <Text style={{ 
             ...TYPOGRAPHY.heading.h2, 
-            color: COLORS.text.primary, 
+            color: colors.primary,
             marginBottom: 16,
             marginLeft: 4,
           }}>
@@ -140,6 +153,7 @@ const HomeScreen = observer(() => {
             variant="featured"
             onDelete={handleDeleteEvent}
             onEdit={handleEditPress}
+            themeColors={colors}
           />
         </>
       )}
@@ -148,7 +162,7 @@ const HomeScreen = observer(() => {
       {otherEvents.length > 0 && (
         <Text style={{ 
           ...TYPOGRAPHY.heading.h2, 
-          color: COLORS.text.primary,
+          color: colors.secondary,
           marginTop: 32,
           marginBottom: 16,
           marginLeft: 4,
@@ -160,21 +174,34 @@ const HomeScreen = observer(() => {
   );
 
   const renderEmptyState = () => (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+    <View style={{ 
+      flex: 1, 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: 32 
+    }}>
       <View style={{ 
-        backgroundColor: COLORS.surface,
+        backgroundColor: colors.card,
         borderRadius: BORDER_RADIUS.round,
         padding: 24,
         marginBottom: 16,
       }}>
-        <Ionicons name="calendar-outline" size={64} color={COLORS.text.secondary} />
+        <Ionicons 
+          name="calendar-outline" 
+          size={64} 
+          color={colors.primary}
+        />
       </View>
-      <Text style={{ ...TYPOGRAPHY.heading.h3, color: COLORS.text.primary, textAlign: 'center' }}>
+      <Text style={{ 
+        ...TYPOGRAPHY.heading.h3, 
+        color: colors.primary,
+        textAlign: 'center' 
+      }}>
         No events yet
       </Text>
       <Text style={{ 
         ...TYPOGRAPHY.body.medium, 
-        color: COLORS.text.secondary,
+        color: colors.text,
         textAlign: 'center',
         marginTop: 8,
         marginBottom: 24,
@@ -185,7 +212,10 @@ const HomeScreen = observer(() => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+    <SafeAreaView style={{ 
+      flex: 1, 
+      backgroundColor: colors.background
+    }}>
       <FlatList
         data={otherEvents}
         keyExtractor={(item) => item.id}
@@ -196,6 +226,7 @@ const HomeScreen = observer(() => {
               variant="trending"
               onDelete={handleDeleteEvent}
               onEdit={handleEditPress}
+              themeColors={colors}
             />
           </View>
         )}
@@ -203,7 +234,7 @@ const HomeScreen = observer(() => {
         ListEmptyComponent={events.length === 0 ? renderEmptyState : null}
         contentContainerStyle={{ 
           flexGrow: 1,
-          paddingBottom: 100, // Aumentado para dar mais espaço para o botão e último item
+          paddingBottom: 100,
         }}
         showsVerticalScrollIndicator={false}
         bounces={true}
@@ -219,6 +250,7 @@ const HomeScreen = observer(() => {
             setAddEventModalVisible(false);
             setEditingEvent(undefined);
           }}
+          themeColors={colors}
         />
       )}
     </SafeAreaView>

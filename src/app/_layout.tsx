@@ -5,8 +5,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { styled } from 'nativewind';
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import 'react-native-reanimated';
+import { useThemeStore } from '../core/hooks/useTheme';
 import { useColorScheme } from '../hooks/useColorScheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -15,7 +16,9 @@ SplashScreen.preventAutoHideAsync();
 const StyledView = styled(View);
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const systemColorScheme = useColorScheme();
+  const themeState = useThemeStore();
+  
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -26,13 +29,29 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  // Initialize theme
+  useEffect(() => {
+    themeState.initialize();
+  }, []);
+
+  // Uso de StatusBar API diretamente para Android
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      // Aqui podemos usar alguma biblioteca específica para Android se necessário
+      // Mas evitaremos Navigation que está causando erros
+    }
+  }, [themeState.mode]);
+
   if (!loaded) {
     return null;
   }
 
+  // Use theme from themeState
+  const appTheme = themeState.mode === 'dark' ? DarkTheme : DefaultTheme;
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <StyledView className="flex-1 bg-white dark:bg-gray-900 pt-16">
+    <ThemeProvider value={appTheme}>
+      <StyledView className={`flex-1 ${themeState.mode === 'dark' ? 'bg-gray-900' : 'bg-white'} pt-16`}>
         <Stack>
           <Stack.Screen 
             name="(tabs)" 
@@ -42,7 +61,10 @@ export default function RootLayout() {
             }} 
           />
         </Stack>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <StatusBar 
+          style={themeState.mode === 'dark' ? 'light' : 'dark'} 
+          backgroundColor={themeState.colors.background} 
+        />
       </StyledView>
     </ThemeProvider>
   );
