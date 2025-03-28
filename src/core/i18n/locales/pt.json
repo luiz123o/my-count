@@ -1,0 +1,54 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso"
+  },
+  "header": {
+    "hello": "Olá, {{username}}",
+    "searchPlaceholder": "Encontre eventos incríveis",
+    "featured": "Destaques",
+    "seeAll": "Ver todos"
+  },
+  "events": {
+    "title": "Eventos",
+    "addEvent": "Adicionar Evento",
+    "editEvent": "Editar Evento",
+    "deleteEvent": "Excluir Evento",
+    "eventName": "Nome do Evento",
+    "eventDate": "Data do Evento",
+    "eventTime": "Hora do Evento",
+    "eventImage": "Imagem do Evento (Opcional)",
+    "tapToAddImage": "Toque para adicionar imagem",
+    "enterEventName": "Digite o nome do evento",
+    "dateAndTime": "Data e Hora",
+    "description": "Descrição (Opcional)",
+    "addDescription": "Adicione uma descrição",
+    "category": "Categoria (Opcional)",
+    "addCategory": "Adicione uma categoria",
+    "backgroundColor": "Cor de Fundo",
+    "icon": "Ícone",
+    "createEvent": "Criar Evento",
+    "daysLeft": "{{count}} dias restantes",
+    "hoursLeft": "{{count}} horas restantes",
+    "minutesLeft": "{{count}} minutos restantes",
+    "noEvents": "Nenhum evento ainda",
+    "confirmDelete": "Tem certeza que deseja excluir este evento?"
+  },
+  "errors": {
+    "requiredField": "Este campo é obrigatório",
+    "invalidDate": "Data inválida",
+    "invalidTime": "Hora inválida",
+    "genericError": "Algo deu errado. Por favor, tente novamente."
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": "Idioma",
+    "theme": "Tema",
+    "notifications": "Notificações"
+  }
+} 

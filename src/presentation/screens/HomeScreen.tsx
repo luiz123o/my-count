@@ -1,13 +1,13 @@
+import { CountdownCard } from '@components/CountdownCard';
+import { EventForm } from '@components/EventForm';
+import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '@constants/theme';
+import { homeViewModel } from '@core/config/di';
+import { Event } from '@domain/entities/Event';
 import { Ionicons } from '@expo/vector-icons';
+import { useUIStore } from '@stores/ui.store';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, Text, TextInput, View } from 'react-native';
-import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
-import { homeViewModel } from '../../core/config/di';
-import { Event } from '../../domain/entities/Event';
-import { CountdownCard } from '../components/CountdownCard';
-import { EventForm } from '../components/EventForm';
-import { useUIStore } from '../stores/ui.store';
 
 const HomeScreen = observer(() => {
   const [events, setEvents] = useState<Event[]>([]);

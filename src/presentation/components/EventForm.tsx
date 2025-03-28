@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Image,
     Modal,
@@ -46,6 +47,10 @@ export const EventForm: React.FC<EventFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { t } = useTranslation('translation');
+  
+  console.log('Translation test:', t('events.eventName'));
+
   const [name, setName] = useState('');
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState('');
@@ -150,7 +155,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 }}
               >
                 <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>
-                  {event ? 'Edit Event' : 'New Event'}
+                  {event ? t('events.editEvent') : t('events.addEvent')}
                 </Text>
                 <Pressable
                   onPress={onCancel}
@@ -169,7 +174,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Image Picker */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Event Image (Optional)
+                    {t('events.eventImage')}
                   </Text>
                   <Pressable
                     onPress={pickImage}
@@ -198,7 +203,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                       <View style={{ alignItems: 'center' }}>
                         <Ionicons name="image-outline" size={32} color={COLORS.text.secondary} />
                         <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.secondary, marginTop: 8 }}>
-                          Tap to add image
+                          {t('events.tapToAddImage')}
                         </Text>
                       </View>
                     )}
@@ -208,12 +213,12 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Event Name */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Event Name
+                    {t('events.eventName')}
                   </Text>
                   <TextInput
                     value={name}
                     onChangeText={setName}
-                    placeholder="Enter event name"
+                    placeholder={t('events.enterEventName')}
                     placeholderTextColor={COLORS.text.secondary}
                     style={{
                       ...TYPOGRAPHY.body.large,
@@ -230,7 +235,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Date Picker */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Date and Time
+                    {t('events.dateAndTime')}
                   </Text>
                   <Pressable
                     onPress={() => setShowDatePicker(true)}
@@ -264,12 +269,12 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Description */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Description (Optional)
+                    {t('events.description')}
                   </Text>
                   <TextInput
                     value={description}
                     onChangeText={setDescription}
-                    placeholder="Add a description"
+                    placeholder={t('events.addDescription')}
                     placeholderTextColor={COLORS.text.secondary}
                     multiline
                     numberOfLines={4}
@@ -290,12 +295,12 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Category */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Category (Optional)
+                    {t('events.category')}
                   </Text>
                   <TextInput
                     value={category}
                     onChangeText={setCategory}
-                    placeholder="Add a category"
+                    placeholder={t('events.addCategory')}
                     placeholderTextColor={COLORS.text.secondary}
                     style={{
                       ...TYPOGRAPHY.body.large,
@@ -312,7 +317,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Color Selection */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Background Color
+                    {t('events.backgroundColor')}
                   </Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                     {COLOR_OPTIONS.map((color) => (
@@ -336,7 +341,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 {/* Icon Selection */}
                 <View>
                   <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, marginBottom: 8 }}>
-                    Icon
+                    {t('events.icon')}
                   </Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                     {ICON_OPTIONS.map((icon) => (
@@ -384,7 +389,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   }}
                 >
                   <Text style={{ ...TYPOGRAPHY.body.large, color: COLORS.text.primary }}>
-                    Cancel
+                    {t('common.cancel')}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -397,7 +402,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   }}
                 >
                   <Text style={{ ...TYPOGRAPHY.body.large, color: COLORS.text.light }}>
-                    {event ? 'Save Changes' : 'Create Event'}
+                    {event ? t('common.save') : t('events.createEvent')}
                   </Text>
                 </Pressable>
               </View>

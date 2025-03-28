@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
@@ -8,6 +9,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ username = 'there' }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
       {/* Top Bar */}
@@ -16,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ username = 'there' }) => {
           <Ionicons name="menu-outline" size={24} color={COLORS.text.primary} />
         </Pressable>
         <Text style={{ ...TYPOGRAPHY.heading.h3, color: COLORS.text.primary }}>
-          Hello, {username}
+          {t('header.hello', { username })}
         </Text>
         <Pressable>
           <Ionicons name="notifications-outline" size={24} color={COLORS.text.primary} />
@@ -38,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ username = 'there' }) => {
       >
         <Ionicons name="search-outline" size={20} color={COLORS.text.secondary} />
         <TextInput
-          placeholder="Find amazing events"
+          placeholder={t('header.searchPlaceholder')}
           placeholderTextColor={COLORS.text.secondary}
           style={{
             flex: 1,
@@ -51,9 +54,9 @@ export const Header: React.FC<HeaderProps> = ({ username = 'there' }) => {
 
       {/* Section Title */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>Featured</Text>
+        <Text style={{ ...TYPOGRAPHY.heading.h2, color: COLORS.text.primary }}>{t('header.featured')}</Text>
         <Pressable>
-          <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.primary }}>See all</Text>
+          <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.primary }}>{t('header.seeAll')}</Text>
         </Pressable>
       </View>
     </View>

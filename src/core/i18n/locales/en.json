@@ -1,0 +1,54 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "header": {
+    "hello": "Hello, {{username}}",
+    "searchPlaceholder": "Find amazing events",
+    "featured": "Featured",
+    "seeAll": "See all"
+  },
+  "events": {
+    "title": "Events",
+    "addEvent": "Add Event",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "eventName": "Event Name",
+    "eventDate": "Event Date",
+    "eventTime": "Event Time",
+    "eventImage": "Event Image (Optional)",
+    "tapToAddImage": "Tap to add image",
+    "enterEventName": "Enter event name",
+    "dateAndTime": "Date and Time",
+    "description": "Description (Optional)",
+    "addDescription": "Add a description",
+    "category": "Category (Optional)",
+    "addCategory": "Add a category",
+    "backgroundColor": "Background Color",
+    "icon": "Icon",
+    "createEvent": "Create Event",
+    "daysLeft": "{{count}} days left",
+    "hoursLeft": "{{count}} hours left",
+    "minutesLeft": "{{count}} minutes left",
+    "noEvents": "No events yet",
+    "confirmDelete": "Are you sure you want to delete this event?"
+  },
+  "errors": {
+    "requiredField": "This field is required",
+    "invalidDate": "Invalid date",
+    "invalidTime": "Invalid time",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications"
+  }
+} 

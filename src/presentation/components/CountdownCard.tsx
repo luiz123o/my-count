@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BORDER_RADIUS, COLORS, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 import { Event } from '../../domain/entities/Event';
@@ -29,12 +30,13 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
   onDelete,
   onEdit,
 }) => {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState(calculateCountdown(event.date));
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown(calculateCountdown(event.date));
-    }, 60000); // Atualiza a cada minuto
+    }, 60000); // Update every minute
 
     return () => clearInterval(timer);
   }, [event.date]);
@@ -61,12 +63,12 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
               style={{
                 width: '100%',
                 height: '100%',
-                opacity: 0.8, // Deixa a imagem um pouco mais escura para melhor contraste
+                opacity: 0.8,
               }}
               resizeMode="cover"
             />
           )}
-          {/* Overlay para garantir contraste */}
+          {/* Overlay for better contrast */}
           <View style={{
             ...StyleSheet.absoluteFillObject,
             backgroundColor: event.color,
@@ -128,7 +130,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
                 {countdown.days}
               </Text>
               <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
-                days
+                {t('events.daysLeft', { count: countdown.days })}
               </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
@@ -136,7 +138,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
                 {countdown.hours}
               </Text>
               <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
-                hours
+                {t('events.hoursLeft', { count: countdown.hours })}
               </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
@@ -144,7 +146,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
                 {countdown.minutes}
               </Text>
               <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>
-                minutes
+                {t('events.minutesLeft', { count: countdown.minutes })}
               </Text>
             </View>
           </View>
@@ -161,7 +163,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
         borderRadius: BORDER_RADIUS.lg,
         overflow: 'hidden',
         marginBottom: 12,
-        height: 100, // Altura fixa para os cards menores
+        height: 100,
         ...SHADOWS.small,
       }}
     >
@@ -221,7 +223,7 @@ export const CountdownCard: React.FC<CountdownCardProps> = ({
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={{ ...TYPOGRAPHY.body.medium, color: COLORS.text.primary, fontWeight: '600' }}>
-            {countdown.days}d {countdown.hours}h
+            {t('events.daysLeft', { count: countdown.days })} {t('events.hoursLeft', { count: countdown.hours })}
           </Text>
           {event.category && (
             <Text style={{ ...TYPOGRAPHY.body.small, color: COLORS.text.secondary }}>

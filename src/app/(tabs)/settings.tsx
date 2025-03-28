@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, Text, View } from 'react-native';
-import { COLORS, TYPOGRAPHY } from '../../src/constants/theme';
+import { COLORS, TYPOGRAPHY } from '../../constants/theme';
 
 export default function SettingsScreen() {
   return (

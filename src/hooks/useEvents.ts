@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { Countdown, Event, EventFormData } from '../types/event';
+import { Countdown, Event, EventFormData } from '../../types/event';
 
 // Chave única para armazenar os eventos no AsyncStorage
 const STORAGE_KEY = '@events';

@@ -3,14 +3,26 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      ['expo-router/babel', { root: './app' }],
       'nativewind/babel',
-      'expo-router/babel',
       [
         'module-resolver',
         {
-          root: ['./src'],
+          root: ['.'],
           alias: {
             '@': './src',
+            '@assets': './src/assets',
+            '@components': './src/presentation/components',
+            '@screens': './src/presentation/screens',
+            '@constants': './src/constants',
+            '@hooks': './src/hooks',
+            '@utils': './src/utils',
+            '@domain': './src/domain',
+            '@core': './src/core',
+            '@data': './src/data',
+            '@i18n': './src/i18n',
+            '@shared': './src/shared',
+            '@stores': './src/presentation/stores'
           },
         },
       ],

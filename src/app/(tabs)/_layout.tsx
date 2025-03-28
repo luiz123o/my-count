@@ -1,10 +1,10 @@
+import { BORDER_RADIUS, COLORS } from '@constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import type { UIStore } from '@stores/ui.store';
+import { useUIStore } from '@stores/ui.store';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Pressable, View } from 'react-native';
-import { BORDER_RADIUS, COLORS } from '../../src/constants/theme';
-import type { UIStore } from '../../src/presentation/stores/ui.store';
-import { useUIStore } from '../../src/presentation/stores/ui.store';
 
 export default function TabLayout() {
   const setAddEventModalVisible = useUIStore((state: UIStore) => state.setAddEventModalVisible);
